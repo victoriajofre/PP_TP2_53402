@@ -1,3 +1,16 @@
+import modelo.EventoUniversitario;
+import modelo.Sala;
+import modelo.Estudiante;
+import modelo.actividades.Actividad;
+import modelo.Inscripcion;
+import modelo.certificacion.Certificable;
+import excepciones.CupoExcedidoException;
+import modelo.actividades.Charla;
+import modelo.actividades.Taller;
+import modelo.actividades.Curso;
+import hilos.EnvioTicketsThread;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,13 +19,10 @@ public class App {
     public static void main(String[] args) {
 
         // =========================================================
-        // EJERCICIO 1
-        // Clases, objetos, constructor de copia, static y final
+        // TP2 - EJERCICIO 1
+        // Modularización, excepciones y persistencia
         // =========================================================
 
-        System.out.println("======================================");
-        System.out.println("           EJERCICIO 1");
-        System.out.println("======================================");
 
         EventoUniversitario eventoEj1 =
                 new EventoUniversitario(
@@ -40,80 +50,182 @@ public class App {
         );
 
 
-        // =========================================================
-        // EJERCICIO 2
-        // Relaciones entre objetos y colecciones
-        // Estudiantes - Sala - Evento - Inscripciones
-        // =========================================================
-
-        System.out.println();
-        System.out.println("======================================");
-        System.out.println("           EJERCICIO 2");
-        System.out.println("======================================");
-
-        // Se construye una lista de estudiantes
-
         List<Estudiante> estudiantes = new ArrayList<>();
 
-        Estudiante estudiante1 =
-                new Estudiante("53402", "Victoria");
-
-        Estudiante estudiante2 =
-                new Estudiante("50001", "Juan");
-
-        Estudiante estudiante3 =
-                new Estudiante("50002", "Sofía");
+        Estudiante estudiante1 = new Estudiante("53402", "Victoria");
+        Estudiante estudiante2 = new Estudiante("50001", "Juan");
+        Estudiante estudiante3 = new Estudiante("50002", "Sofia");
+        Estudiante estudiante4 = new Estudiante("50003", "Martina");
+        Estudiante estudiante5 = new Estudiante("50004", "Lucia");
+        Estudiante estudiante6 = new Estudiante("50005", "Pedro");
 
         estudiantes.add(estudiante1);
         estudiantes.add(estudiante2);
         estudiantes.add(estudiante3);
+        estudiantes.add(estudiante4);
+        estudiantes.add(estudiante5);
+        estudiantes.add(estudiante6);
+
+        EventoUniversitario eventoPrincipal =
+                new EventoUniversitario(
+                        "EVT-1",
+                        "Jornada de Programacion",
+                        10000,
+                        false
+                );
+
+        Sala sala1 = new Sala(1, "Aula Magna");
+        eventoPrincipal.asignarSala(sala1);
+
+        eventoPrincipal.crearActividad(
+                1,
+                "Introduccion a Java",
+                5,
+                "charla"
+        );
+
+        Actividad actividadPrueba =
+                eventoPrincipal.getActividades().get(0);
+
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("   PRUEBA DE EXCEPCION POR CUPO");
+        System.out.println("======================================");
+
+        try {
+
+            actividadPrueba.inscribir(estudiante1);
+
+            System.out.println(
+                    "Inscripcion realizada correctamente para "
+                            + estudiante1.getNombre()
+            );
+
+        } catch (CupoExcedidoException e) {
+
+            System.out.println(
+                    "Error de inscripcion: "
+                            + e.getMessage()
+            );
+        }
+
+        try {
+
+            actividadPrueba.inscribir(estudiante2);
+            actividadPrueba.inscribir(estudiante3);
+            actividadPrueba.inscribir(estudiante4);
+            actividadPrueba.inscribir(estudiante5);
+
+            System.out.println(
+                    "Se completo el cupo de la actividad."
+            );
+
+            actividadPrueba.inscribir(estudiante6);
+
+        } catch (CupoExcedidoException e) {
+
+            System.out.println(
+                    "Caso fallido controlado: "
+                            + e.getMessage()
+            );
+        }
 
         System.out.println(
                 "Cantidad de estudiantes registrados: "
                         + estudiantes.size()
         );
+        eventoPrincipal.crearActividad(
+                2,
+                "Actividad para Persistencia",
+                10,
+                "taller"
+        );
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("      PRUEBA DE PERSISTENCIA");
+        System.out.println("======================================");
 
+        Actividad actividadPersistencia =
+                eventoPrincipal.getActividades().get(1);
+
+        try {
+
+            actividadPersistencia.inscribir(estudiante4);
+
+            System.out.println(
+                    "Inscripción realizada correctamente."
+            );
+
+            eventoPrincipal.persistirEvento("evento.dat");
+
+            System.out.println(
+                    "Evento guardado correctamente."
+            );
+
+            EventoUniversitario eventoRecuperado =
+                    EventoUniversitario.recuperarEvento("evento.dat");
+
+            System.out.println(
+                    "Evento recuperado correctamente."
+            );
+
+            eventoRecuperado.mostrarDatos();
+
+        } catch (CupoExcedidoException e) {
+
+            System.out.println(
+                    "Error de inscripción: "
+                            + e.getMessage()
+            );
+
+        } catch (IOException e) {
+
+            System.out.println(
+                    "Error de persistencia: "
+                            + e.getMessage()
+            );
+
+        } catch (ClassNotFoundException e) {
+
+            System.out.println(
+                    "Error al recuperar el evento: "
+                            + e.getMessage()
+            );
+
+        } finally {
+
+            System.out.println(
+                    "Fin del proceso."
+            );
+        }
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("         TP2 - EJERCICIO 2");
+        System.out.println("     INTERFACES Y CERTIFICADOS");
+        System.out.println("======================================");
 
         // Se construye otro evento
-
-        EventoUniversitario eventoPrincipal =
-                new EventoUniversitario(
-                        "EVT-1",
-                        "Jornada de Programación",
-                        10000,
-                        false
-                );
+        eventoPrincipal = new EventoUniversitario(
+                "EVT-1",
+                "Jornada de Programación",
+                10000,
+                false
+        );
 
 
         // AGREGACIÓN:
-        // La Sala se crea independientemente del Evento
+        // La modelo.Sala se crea independientemente del Evento
 
-        Sala sala1 =
-                new Sala(
-                        1,
-                        "Aula Magna"
-                );
+        sala1 = new Sala(
+                1,
+                "Aula Magna"
+        );
 
         eventoPrincipal.asignarSala(sala1);
 
-        System.out.println("Sala creada y asignada al evento: "
+        System.out.println("modelo.Sala creada y asignada al evento: "
                 + sala1.getNombre());
 
-
-        // =========================================================
-        // EJERCICIO 3
-        // Herencia, abstracción y polimorfismo
-        // Charla y Taller son subclases de Actividad
-        // =========================================================
-
-        System.out.println();
-        System.out.println("======================================");
-        System.out.println("           EJERCICIO 3");
-        System.out.println("======================================");
-
-
-        // COMPOSICIÓN:
-        // Las actividades son creadas por el propio evento
 
         eventoPrincipal.crearActividad(
                 1,
@@ -128,27 +240,98 @@ public class App {
                 15,
                 "taller"
         );
+        eventoPrincipal.crearActividad(
+                3,
+                "Java Avanzado",
+                15,
+                "curso"
+        );
 
 
         // INSCRIPCIONES
         // Concepto incorporado en el Ejercicio 2
-        // y utilizado ahora con Charla y Taller
+        // INSCRIPCIONES EN CHARLA, TALLER Y CURSO
 
+
+        try {
+
+            eventoPrincipal.getActividades()
+                    .get(0)
+                    .inscribir(estudiante1);
+
+            eventoPrincipal.getActividades()
+                    .get(0)
+                    .inscribir(estudiante2);
+
+            eventoPrincipal.getActividades()
+                    .get(1)
+                    .inscribir(estudiante2);
+
+            eventoPrincipal.getActividades()
+                    .get(1)
+                    .inscribir(estudiante3);
+
+            eventoPrincipal.getActividades()
+                    .get(2)
+                    .inscribir(estudiante4);
+
+            eventoPrincipal.getActividades()
+                    .get(2)
+                    .inscribir(estudiante5);
+
+            System.out.println("Inscripciones realizadas correctamente.");
+
+        } catch (CupoExcedidoException e) {
+
+            System.out.println(
+                    "Error al realizar una inscripción: "
+                            + e.getMessage()
+            );
+        }
         eventoPrincipal.getActividades()
                 .get(0)
-                .inscribir(estudiante1);
-
-        eventoPrincipal.getActividades()
+                .getInscripciones()
                 .get(0)
-                .inscribir(estudiante2);
+                .confirmar();
 
         eventoPrincipal.getActividades()
                 .get(1)
-                .inscribir(estudiante2);
+                .getInscripciones()
+                .get(0)
+                .confirmar();
 
         eventoPrincipal.getActividades()
-                .get(1)
-                .inscribir(estudiante3);
+                .get(2)
+                .getInscripciones()
+                .get(0)
+                .confirmar();
+
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("      CERTIFICADOS EMITIDOS");
+        System.out.println("======================================");
+
+        for (Actividad actividad : eventoPrincipal.getActividades()) {
+
+            if (actividad instanceof Certificable certificable) {
+
+                System.out.println();
+                System.out.println(
+                        "Actividad: " + actividad.getTitulo()
+                );
+
+                for (Inscripcion inscripcion : actividad.getInscripciones()) {
+
+                    String certificado =
+                            certificable.generarCertificado(
+                                    inscripcion.getEstudiante()
+                            );
+
+                    System.out.println(certificado);
+                }
+            }
+        }
+
 
 
         // RESUMEN DEL EVENTO
@@ -156,16 +339,73 @@ public class App {
 
         System.out.println();
         System.out.println("RESUMEN DEL EVENTO");
-
         eventoPrincipal.mostrarDatos();
-
-
-        // CONTADOR STATIC
 
         System.out.println();
         System.out.println(
                 "Total de objetos EventoUniversitario creados: "
                         + EventoUniversitario.getCantidadEventos()
         );
+
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("       TP2 - EJERCICIO 3");
+        System.out.println("       GENERICS Y WILDCARDS");
+        System.out.println("======================================");
+
+        List<Charla> charlas =
+                eventoPrincipal.filtrarActividadesPorTipo(Charla.class);
+
+        List<Taller> talleres =
+                eventoPrincipal.filtrarActividadesPorTipo(Taller.class);
+
+        List<Curso> cursos =
+                eventoPrincipal.filtrarActividadesPorTipo(Curso.class);
+
+        System.out.println(
+                "Charlas encontradas: " + charlas.size()
+        );
+
+        System.out.println(
+                "Talleres encontrados: " + talleres.size()
+        );
+
+        System.out.println(
+                "Cursos encontrados: " + cursos.size()
+        );
+
+        System.out.println();
+
+        System.out.println(
+                "Costo de materiales de talleres: $"
+                        + eventoPrincipal.calcularCostoMateriales(talleres)
+        );
+
+        System.out.println(
+                "Costo de materiales de cursos: $"
+                        + eventoPrincipal.calcularCostoMateriales(cursos)
+        );
+
+        System.out.println(
+                "Costo de materiales de todas las actividades: $"
+                        + eventoPrincipal.calcularCostoMateriales(
+                        eventoPrincipal.getActividades()
+                )
+        );
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("         TP2 - EJERCICIO 4");
+        System.out.println("       CLASES ANIDADAS E HILOS");
+        System.out.println("======================================");
+        Thread envioTicketsThread =
+                new EnvioTicketsThread(eventoPrincipal);
+
+        envioTicketsThread.start();
+        System.out.println(
+                "[MAIN] El programa principal continúa ejecutándose."
+        );
+
+        eventoPrincipal.mostrarDatos();
+        }
+
     }
-}

@@ -1,92 +1,292 @@
-# PP_TP1_53402
+# PP_TP2_53402
 
-Trabajo Práctico N° 1  
-Paradigmas de Programación  
-UTN - FRM
+## Paradigmas de Programación - Trabajo Práctico N° 2
 
-## Programación Orientada a Objetos en Java
+Proyecto desarrollado en **Java** para la materia **Paradigmas de Programación** de la **UTN - Facultad Regional Mendoza**.
 
-Este proyecto corresponde al Trabajo Práctico N° 1 de la materia Paradigmas de Programación.
+El trabajo implementa un sistema de gestión de eventos universitarios y amplía progresivamente el modelo desarrollado en el TP1, incorporando excepciones, persistencia, interfaces, generics, clases anidadas e hilos.
 
-El trabajo desarrolla de manera incremental los conceptos fundamentales de Programación Orientada a Objetos en Java.
+---
 
-## Ejercicio 1
+## Datos del proyecto
 
-Se implementan los siguientes conceptos:
+- **Materia:** Paradigmas de Programación
+- **Trabajo Práctico:** TP2
+- **Legajo:** 53402
+- **IDE:** IntelliJ IDEA
+- **JDK:** Java 21
 
-- Clases y objetos
-- Encapsulamiento
-- Constructores
-- Constructor de copia
-- Atributos `static`
-- Atributos `final`
-- Métodos de clase
-- Cálculo del costo estimado de un evento
+---
 
-## Ejercicio 2
+## Descripción general
 
-Se incorporan:
+El sistema permite gestionar eventos universitarios con salas, actividades y estudiantes inscriptos.
 
-- Clase `Sala`
-- Clase `Estudiante`
-- Clase `Actividad`
-- Clase asociativa `Inscripcion`
-- Colecciones `List` y `ArrayList`
-- Agregación entre `EventoUniversitario` y `Sala`
-- Composición entre `EventoUniversitario` y `Actividad`
-- Registro de estudiantes en actividades
+Las actividades pueden ser:
 
-## Ejercicio 3
+- `Charla`
+- `Taller`
+- `Curso`
 
-Se agregan los conceptos de:
+Además, el sistema permite:
 
-- Herencia
-- Clase abstracta `Actividad`
-- Subclases `Charla` y `Taller`
-- Métodos abstractos
-- Métodos `final`
-- Polimorfismo
-- Ligado dinámico
+- controlar el cupo máximo de las actividades;
+- manejar excepciones propias;
+- persistir y recuperar eventos mediante serialización;
+- emitir certificados para actividades certificables;
+- filtrar actividades mediante generics;
+- calcular costos utilizando wildcards;
+- generar tickets de acceso para inscripciones confirmadas;
+- enviar tickets en un hilo de ejecución independiente.
 
-El costo de los materiales se calcula de forma polimórfica según el tipo de actividad.
+---
 
-## Ejercicio 4
+## Estructura del proyecto
 
-Se realiza un mapa de memoria de ejecución donde se representan:
+```text
+src
+├── excepciones
+│   └── CupoExcedidoException.java
+│
+├── hilos
+│   └── EnvioTicketsThread.java
+│
+├── modelo
+│   ├── actividades
+│   │   ├── Actividad.java
+│   │   ├── Charla.java
+│   │   ├── Taller.java
+│   │   └── Curso.java
+│   │
+│   ├── certificacion
+│   │   └── Certificable.java
+│   │
+│   ├── Estudiante.java
+│   ├── EventoUniversitario.java
+│   ├── Inscripcion.java
+│   └── Sala.java
+│
+└── App.java
+```
 
-- Variables locales del método `main`
-- Objetos almacenados en el Heap
-- Referencias entre objetos
-- Agregación
-- Composición
-- Herencia
-- Inscripciones
-- Colecciones de actividades y estudiantes
+---
 
-## Ejecución del proyecto
+## Ejercicio 1 - Excepciones y persistencia
 
-Para ejecutar el programa:
+Se reorganizó el proyecto utilizando paquetes y se incorporó la excepción propia:
 
-1. Abrir el proyecto en IntelliJ IDEA.
-2. Abrir la clase `App.java`.
-3. Ejecutar el método `main`.
+```java
+CupoExcedidoException
+```
 
-El proyecto fue desarrollado utilizando Java 21.
+El método de inscripción verifica el cupo disponible y lanza la excepción cuando la actividad se encuentra completa.
 
-## Archivos principales
+También se implementó persistencia mediante serialización y deserialización de objetos.
 
-- `App.java`
-- `EventoUniversitario.java`
-- `Sala.java`
-- `Estudiante.java`
-- `Actividad.java`
-- `Inscripcion.java`
-- `Charla.java`
-- `Taller.java`
+Métodos principales:
 
-## Archivos adicionales
+```java
+persistirEvento(...)
+recuperarEvento(...)
+```
 
-El repositorio también incluye:
+El programa prueba:
 
-- Imagen del mapa de memoria correspondiente al Ejercicio 4.
-- Capturas de pantalla de la ejecución del programa.
+- una inscripción exitosa;
+- una inscripción fallida por cupo completo;
+- guardado del evento en archivo;
+- recuperación del evento;
+- manejo de excepciones con `try-catch-finally`.
+
+---
+
+## Ejercicio 2 - Interfaces y certificados
+
+Se incorporó la interfaz:
+
+```java
+Certificable
+```
+
+Las actividades certificables son:
+
+- `Taller`
+- `Curso`
+
+La clase `Charla` no implementa esta interfaz.
+
+El sistema utiliza polimorfismo de interfaz para generar certificados únicamente cuando una actividad implementa `Certificable`.
+
+Ejemplo:
+
+```java
+if (actividad instanceof Certificable certificable) {
+    // generar certificado
+}
+```
+
+También se agregó la clase `Curso`, que hereda de `Actividad` y posee un atributo `nivel`.
+
+---
+
+## Ejercicio 3 - Generics y wildcards
+
+Se implementaron métodos genéricos dentro de `EventoUniversitario`.
+
+### Filtrado por tipo
+
+```java
+public <T extends Actividad> List<T> filtrarActividadesPorTipo(Class<T> tipo)
+```
+
+Permite obtener listas correctamente tipadas:
+
+```java
+List<Charla>
+List<Taller>
+List<Curso>
+```
+
+### Cálculo de costos con wildcard
+
+```java
+public double calcularCostoMateriales(
+        List<? extends Actividad> actividades
+)
+```
+
+El mismo método puede recibir listas de `Actividad` o de cualquiera de sus subclases.
+
+---
+
+## Ejercicio 4 - Clases anidadas e hilos
+
+Dentro de `Inscripcion` se implementó la clase anidada:
+
+```java
+TicketDeAcceso
+```
+
+El ticket se genera únicamente cuando una inscripción es confirmada.
+
+```java
+public void confirmar() {
+    this.estado = "CONFIRMADA";
+    this.ticket = new TicketDeAcceso();
+}
+```
+
+También se creó:
+
+```java
+EnvioTicketsThread
+```
+
+que extiende `Thread` y se encarga de enviar los tickets correspondientes a las inscripciones confirmadas.
+
+El hilo se inicia mediante:
+
+```java
+envioTicketsThread.start();
+```
+
+De esta forma, el envío de tickets se ejecuta concurrentemente mientras el hilo principal continúa mostrando información del evento.
+
+---
+
+## Conceptos aplicados
+
+Durante el desarrollo se utilizaron los siguientes conceptos de Programación Orientada a Objetos y Java:
+
+- encapsulamiento;
+- constructores;
+- constructor de copia;
+- atributos y métodos `static`;
+- constantes `final`;
+- agregación;
+- composición;
+- herencia;
+- clases y métodos abstractos;
+- polimorfismo;
+- interfaces;
+- excepciones propias;
+- `throw` y `throws`;
+- `try-catch-finally`;
+- serialización y deserialización;
+- colecciones `List` y `ArrayList`;
+- generics;
+- métodos parametrizados acotados;
+- `Class<T>`;
+- wildcards `? extends`;
+- clases anidadas;
+- hilos con `Thread`;
+- concurrencia básica;
+- `start()` y `run()`.
+
+---
+
+## Ejecución
+
+1. Clonar el repositorio.
+2. Abrir el proyecto en IntelliJ IDEA.
+3. Configurar Java 21 o una versión compatible.
+4. Ejecutar la clase:
+
+```text
+App.java
+```
+
+El programa solicitará algunos datos por consola, como:
+
+- nombre del disertante;
+- si un taller requiere notebook;
+- nivel de un curso.
+
+---
+
+## Resultado esperado
+
+Durante la ejecución se muestran, entre otros, los siguientes resultados:
+
+```text
+PRUEBA DE EXCEPCION POR CUPO
+Caso fallido controlado: Cupo máximo alcanzado.
+
+PRUEBA DE PERSISTENCIA
+Evento guardado correctamente.
+Evento recuperado correctamente.
+
+TP2 - EJERCICIO 2
+INTERFACES Y CERTIFICADOS
+
+TP2 - EJERCICIO 3
+GENERICS Y WILDCARDS
+
+TP2 - EJERCICIO 4
+CLASES ANIDADAS E HILOS
+
+[MAIN] El programa principal continúa ejecutándose.
+[Hilo-Envio-Tickets] Inicio del envío de tickets.
+...
+[Hilo-Envio-Tickets] Fin del envío de tickets.
+```
+
+---
+
+## Archivo de persistencia
+
+Durante la ejecución se genera el archivo:
+
+```text
+evento.dat
+```
+
+Este archivo contiene el evento serializado para luego poder ser recuperado mediante deserialización.
+
+---
+
+## Autor
+
+- **Estudiante:**VICTORIA JOFRE
+- **Legajo:** 53402
+- **UTN - Facultad Regional Mendoza**

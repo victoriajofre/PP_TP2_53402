@@ -1,8 +1,22 @@
+package modelo;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
-public class EventoUniversitario {
+import modelo.actividades.Actividad;
+import modelo.actividades.Charla;
+import modelo.actividades.Taller;
+import modelo.actividades.Curso;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+
+public class EventoUniversitario implements Serializable {
     private final String Id;
     private String titulo;
     private double costoBase;
@@ -13,7 +27,7 @@ public class EventoUniversitario {
     private List<Actividad> actividades;
     static {
         cantidadEventos = 0;
-        System.out.println("Inicializador estático: se cargó la clase EventoUniversitario.");
+        System.out.println("Inicializador estático: se cargó la clase modelo.EventoUniversitario.");
     }
     public EventoUniversitario(String id, String nombre, double costo, boolean esGratuito) {
 
@@ -61,9 +75,9 @@ public class EventoUniversitario {
         System.out.println("Costo estimado: $" + calcularCostoEstimado());
 
         if (sala != null) {
-            System.out.println("Sala: " + sala.getNombre());
+            System.out.println("modelo.Sala: " + sala.getNombre());
         } else {
-            System.out.println("Sala: sin asignar");
+            System.out.println("modelo.Sala: sin asignar");
         }
 
         System.out.println("Cantidad de actividades: " + actividades.size());
@@ -77,15 +91,36 @@ public class EventoUniversitario {
     public static int getCantidadEventos() {
         return cantidadEventos;
     }
+    public void persistirEvento(String nombreArchivo) throws IOException {
+
+        try (ObjectOutputStream salida =
+                     new ObjectOutputStream(
+                             new FileOutputStream(nombreArchivo))) {
+
+            salida.writeObject(this);
+        }
+
+    }
+    public static EventoUniversitario recuperarEvento(String nombreArchivo)
+            throws IOException, ClassNotFoundException {
+
+        try (ObjectInputStream entrada =
+                     new ObjectInputStream(
+                             new FileInputStream(nombreArchivo))) {
+
+            return (EventoUniversitario) entrada.readObject();
+        }
+    }
     public void asignarSala(Sala sala) {
         this.sala = sala;
     }
+
     public void crearActividad(
             int id,
             String titulo,
             int cupo,
             String tipoActividad) {
-
+        Scanner scanner = new Scanner(System.in);
         switch (tipoActividad.toLowerCase()) {
 
             case "charla":
@@ -138,6 +173,25 @@ public class EventoUniversitario {
 
                 break;
 
+            case "curso":
+                System.out.print(
+                        "Ingrese el nivel del curso (1, 2 o 3): "
+                );
+
+                int nivel =
+                        scanner.nextInt();
+
+                Actividad curso = new Curso(
+                                id,
+                                titulo,
+                                cupo,
+                                nivel
+                        );
+
+                actividades.add(curso);
+
+                break;
+
             default:
 
                 System.out.println(
@@ -147,5 +201,33 @@ public class EventoUniversitario {
     }
     public List<Actividad> getActividades() {
         return Collections.unmodifiableList(actividades);
+    }
+    public <T extends Actividad> List<T> filtrarActividadesPorTipo(Class<T> tipo) {
+
+        List<T> resultado = new ArrayList<>();
+
+        for (Actividad actividad : actividades) {
+
+            if (tipo.isInstance(actividad)) {
+
+                resultado.add(
+                        tipo.cast(actividad)
+                );
+            }
+        }
+
+        return resultado;
+    }
+    public double calcularCostoMateriales(
+            List<? extends Actividad> actividades
+    ) {
+
+        double total = 0;
+
+        for (Actividad actividad : actividades) {
+            total += actividad.calcularCostoMateriales();
+        }
+
+        return total;
     }
 }

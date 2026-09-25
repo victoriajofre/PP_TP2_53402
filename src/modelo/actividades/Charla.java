@@ -1,3 +1,5 @@
+package modelo.actividades;
+
 public class Charla extends Actividad {
 
     private String disertante;

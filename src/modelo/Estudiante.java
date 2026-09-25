@@ -1,4 +1,7 @@
-public class Estudiante {
+package modelo;
+import java.io.Serializable;
+
+public class Estudiante implements Serializable {
     private String legajo;
     private String nombre;
 
