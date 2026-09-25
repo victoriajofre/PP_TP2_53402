@@ -1,3 +1,4 @@
+// Entrega TP2
 import modelo.EventoUniversitario;
 import modelo.Sala;
 import modelo.Estudiante;
@@ -330,6 +331,7 @@ public class App {
                 "Total de objetos EventoUniversitario creados: "
                         + EventoUniversitario.getCantidadEventos()
         );
+
 
         System.out.println();
         System.out.println("======================================");
