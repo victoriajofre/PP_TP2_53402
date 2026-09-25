@@ -8,7 +8,7 @@ import excepciones.CupoExcedidoException;
 import modelo.actividades.Charla;
 import modelo.actividades.Taller;
 import modelo.actividades.Curso;
-import hilos.EnvioTicketsThread;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -288,23 +288,7 @@ public class App {
                             + e.getMessage()
             );
         }
-        eventoPrincipal.getActividades()
-                .get(0)
-                .getInscripciones()
-                .get(0)
-                .confirmar();
 
-        eventoPrincipal.getActividades()
-                .get(1)
-                .getInscripciones()
-                .get(0)
-                .confirmar();
-
-        eventoPrincipal.getActividades()
-                .get(2)
-                .getInscripciones()
-                .get(0)
-                .confirmar();
 
         System.out.println();
         System.out.println("======================================");
@@ -392,20 +376,8 @@ public class App {
                         eventoPrincipal.getActividades()
                 )
         );
-        System.out.println();
-        System.out.println("======================================");
-        System.out.println("         TP2 - EJERCICIO 4");
-        System.out.println("       CLASES ANIDADAS E HILOS");
-        System.out.println("======================================");
-        Thread envioTicketsThread =
-                new EnvioTicketsThread(eventoPrincipal);
 
-        envioTicketsThread.start();
-        System.out.println(
-                "[MAIN] El programa principal continúa ejecutándose."
-        );
 
-        eventoPrincipal.mostrarDatos();
         }
 
     }
